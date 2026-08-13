@@ -1,0 +1,117 @@
+from flask import request
+from database import db
+from models.aluno import Aluno
+
+
+# GET - Listar todos os alunos
+def listar_alunos():
+    alunos = Aluno.query.all()
+
+    return [aluno.to_dict() for aluno in alunos], 200
+
+
+# GET - Buscar um aluno pelo ID
+def buscar_aluno(aluno_id):
+    aluno = db.session.get(Aluno, aluno_id)
+
+    if not aluno:
+        return {
+            "erro": "Aluno não encontrado."
+        }, 404
+
+    return aluno.to_dict(), 200
+
+
+# POST - Cadastrar um novo aluno
+def cadastrar_aluno():
+    dados = request.get_json()
+
+    if not dados:
+        return {
+            "erro": "Envie os dados do aluno em JSON."
+        }, 400
+
+    if "nome" not in dados:
+        return {
+            "erro": "O campo nome é obrigatório."
+        }, 400
+
+    if "cpf" not in dados:
+        return {
+            "erro": "O campo CPF é obrigatório."
+        }, 400
+
+    if "idade" not in dados:
+        return {
+            "erro": "O campo idade é obrigatório."
+        }, 400
+
+    nome = dados["nome"]
+    cpf = str(dados["cpf"])
+    idade = dados["idade"]
+
+    # Verifica se o CPF já existe
+    aluno_existente = Aluno.query.filter_by(cpf=cpf).first()
+
+    if aluno_existente:
+        return {
+            "erro": "Já existe um aluno com esse CPF."
+        }, 409
+
+    novo_aluno = Aluno(
+        nome=nome,
+        cpf=cpf,
+        idade=idade
+    )
+
+    db.session.add(novo_aluno)
+    db.session.commit()
+
+    return novo_aluno.to_dict(), 201
+
+
+# PUT - Atualizar um aluno
+def atualizar_aluno(aluno_id):
+    aluno = db.session.get(Aluno, aluno_id)
+
+    if not aluno:
+        return {
+            "erro": "Aluno não encontrado."
+        }, 404
+
+    dados = request.get_json()
+
+    if not dados:
+        return {
+            "erro": "Envie os dados para atualização."
+        }, 400
+
+    if "nome" in dados:
+        aluno.nome = dados["nome"]
+
+    if "cpf" in dados:
+        aluno.cpf = str(dados["cpf"])
+
+    if "idade" in dados:
+        aluno.idade = dados["idade"]
+
+    db.session.commit()
+
+    return aluno.to_dict(), 200
+
+
+# DELETE - Excluir um aluno
+def excluir_aluno(aluno_id):
+    aluno = db.session.get(Aluno, aluno_id)
+
+    if not aluno:
+        return {
+            "erro": "Aluno não encontrado."
+        }, 404
+
+    db.session.delete(aluno)
+    db.session.commit()
+
+    return {
+        "mensagem": "Aluno excluído com sucesso."
+    }, 200

@@ -1,0 +1,45 @@
+from flask import Blueprint
+
+from controllers.aluno_controller import (
+    listar_alunos,
+    buscar_aluno,
+    cadastrar_aluno,
+    atualizar_aluno,
+    excluir_aluno
+)
+
+
+aluno_routes = Blueprint(
+    "aluno_routes",
+    __name__
+)
+
+
+# GET - Listar alunos
+@aluno_routes.route("/alunos", methods=["GET"])
+def get_alunos():
+    return listar_alunos()
+
+
+# GET - Buscar aluno por ID
+@aluno_routes.route("/alunos/<int:aluno_id>", methods=["GET"])
+def get_aluno(aluno_id):
+    return buscar_aluno(aluno_id)
+
+
+# POST - Cadastrar aluno
+@aluno_routes.route("/alunos", methods=["POST"])
+def post_aluno():
+    return cadastrar_aluno()
+
+
+# PUT - Atualizar aluno
+@aluno_routes.route("/alunos/<int:aluno_id>", methods=["PUT"])
+def put_aluno(aluno_id):
+    return atualizar_aluno(aluno_id)
+
+
+# DELETE - Excluir aluno
+@aluno_routes.route("/alunos/<int:aluno_id>", methods=["DELETE"])
+def delete_aluno(aluno_id):
+    return excluir_aluno(aluno_id)
